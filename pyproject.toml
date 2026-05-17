@@ -1,0 +1,36 @@
+[build-system]
+requires = [
+    "setuptools >= 61.0",   # required for PEP 660 support - builds the package.
+    "setuptools_scm >= 8.0" # required for PEP 621 support - manages the version number based on git tags.
+]
+build-backend = "setuptools.build_meta" # Use setuptools as the engine to build this package.
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+three_ps_lcca_gui = [
+    "utils/units.json",
+]
+
+[tool.setuptools.packages.find]
+namespaces = true
+where = ["src"]
+exclude = ["*.debug", "*.tests", "*.egg-info"]
+
+[project]
+name = "three_ps_lcca_api"
+version = "1.0.0"
+dependencies = ["three_ps_lcca_core@git+https://github.com/swas02/3psLCCA-core"]
+requires-python = ">= 3.10"
+
+description = "A Python package for performing life cycle cost analysis (LCCA) on three primary steel design options: hot-rolled, cold-formed, and built-up steel sections. This package provides tools and functions to evaluate the economic performance of these steel design options over their entire life cycle, including initial costs, maintenance costs, and end-of-life costs. It is designed to assist engineers and decision-makers in selecting the most cost-effective steel design option for their projects."
+
+authors = [
+    {name = "Osdag", email = "osdag@fossee.in"}
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["steel design", "life cycle analysis", "engineering"]
+
+[project.scripts]
