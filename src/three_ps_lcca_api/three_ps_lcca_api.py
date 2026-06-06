@@ -1,5 +1,5 @@
 import json
-
+from pathlib import Path
 from typing import Dict, Union
 import zipfile
 
@@ -526,31 +526,32 @@ class ThreePsAPI(object):
         return self.results['end_of_life']
     
     def load_3pslcca(self, path: Union[str, None]): # will be implemented
-        if not path:
+        if not path or not Path(path).exists() or Path(path).suffix != ".3psLCCA":
             return False
-        # try:
-            input_data = {}
-        with zipfile.ZipFile(path, "r") as zf:
-            meta: Dict = {}
+        try:
+            with zipfile.ZipFile(path, "r") as zf:
+                meta: Dict = {}
 
             # Fallback to checkpoint_meta.json
-            try:
-                meta = json.loads(
-                    zf.read("manifest.json").decode("utf-8"))
-            except:
-                pass
-            chunks = list(meta.get('chunks', 'N/A').keys())
-            chunks_data = {}
-            for chunk_name in chunks:
-                chunks_data[chunk_name] = _decode(zf.read(f'chunks/{chunk_name}.lcca'))
-            analysis_period_years = chunks_data.get('analysis_period',{}).get('analysis_period')
-            self.set_input_data(DataPreparer.prepare_data_object(chunks_data, analysis_period_years)[1])
-            self.set_wpi_data(DataPreparer.prepare_wpi_object(chunks_data))
-            self.set_lcc_breakdown(DataPreparer.prepare_life_cycle_construction_cost(chunks_data))
-        return True
+                try:
+                    meta = json.loads(
+                        zf.read("manifest.json").decode("utf-8"))
+                except:
+                    pass
+                chunks = list(meta.get('chunks', 'N/A').keys())
+                chunks_data = {}
+                for chunk_name in chunks:
+                    chunks_data[chunk_name] = _decode(zf.read(f'chunks/{chunk_name}.lcca'))
+                analysis_period_years = chunks_data.get('analysis_period',{}).get('analysis_period')
+                self.set_input_data(DataPreparer.prepare_data_object(chunks_data, analysis_period_years)[1])
+                self.set_wpi_data(DataPreparer.prepare_wpi_object(chunks_data))
+                self.set_lcc_breakdown(DataPreparer.prepare_life_cycle_construction_cost(chunks_data))
+            return True
+        except:
+            return False
 
 if __name__ == "__main__":
     tps_api = ThreePsAPI()
-    if tps_api.load_3pslcca('/mnt/Linuxtra/intern_work/3psLCCA-gui/Mumbai-Steel-2L-35m-F.3psLCCA'):
+    if tps_api.load_3pslcca('Mumbai-Steel-2L-35m-F.3psLCCA'):
         print(tps_api.calculate())
         
